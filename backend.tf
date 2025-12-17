@@ -23,7 +23,7 @@ terraform {
     bucket = "terraform.tfstate2025"
     key    = "backend-report"
     region = "us-east-1"
-    #dynamodb_table = "Terraform_VPC"
+    dynamodb_table = "Terraform_VPC"
     encrypt = true
   }
 }
