@@ -87,7 +87,7 @@
 #                  - Access limited to VPC network
 # -----------------------------------------------------------------------------
 
-resource "aws_instance" "k8s-HA-cluster" {
+/*resource "aws_instance" "k8s-HA-cluster" {
   count                  = 3
   ami                    = data.aws_ami.ubuntu_22.id
   instance_type          = "t3.medium"
@@ -100,7 +100,7 @@ resource "aws_instance" "k8s-HA-cluster" {
   }
 
   user_data = file("${path.module}/installation_scripts/Create+K8s+HA+SetUp.sh")
-}
+}*/
 
 # -------------------------------------------------------------------------
 # Resource  : Ansible Controller Server
