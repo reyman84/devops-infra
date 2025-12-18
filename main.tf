@@ -33,11 +33,11 @@
   ami                    = data.aws_ami.ubuntu_24.id
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.devops_project.key_name
-  subnet_id              = module.vpc.public_subnets[1]
+  subnet_id              = module.vpc.public_subnets[count.index]
   vpc_security_group_ids = [aws_security_group.ssh.id, aws_security_group.allow_all.id]
 
   tags = {
-    Name = "Docker-Engine"
+    Name = "Docker-Engine-${count.index + 1}"
   }
 
   user_data = file("${path.module}/installation_scripts/docker_install.sh")
@@ -57,7 +57,7 @@
   ami                    = data.aws_ami.ubuntu_24.id
   instance_type          = "t3.medium"
   key_name               = aws_key_pair.devops_project.key_name
-  subnet_id              = module.vpc.public_subnets[2]
+  subnet_id              = module.vpc.public_subnets[count.index]
   vpc_security_group_ids = [aws_security_group.ssh.id, aws_security_group.allow_all.id]
 
   tags = {
@@ -92,7 +92,7 @@
   ami                    = data.aws_ami.ubuntu_22.id
   instance_type          = "t3.medium"
   key_name               = aws_key_pair.devops_project.key_name
-  subnet_id              = module.vpc.public_subnets[2]
+  subnet_id              = module.vpc.public_subnets[count.index]
   vpc_security_group_ids = [aws_security_group.ssh.id, aws_security_group.allow_all.id]
 
   tags = {
@@ -114,7 +114,7 @@
   ami                    = data.aws_ami.ubuntu_24.id
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.devops_project.key_name
-  subnet_id              = module.vpc.public_subnets[0]
+  subnet_id              = module.vpc.public_subnets[count.index]
   vpc_security_group_ids = [aws_security_group.ssh.id]
 
   tags = {
@@ -135,7 +135,7 @@
   ami                    = data.aws_ami.ubuntu_24.id
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.devops_project.key_name
-  subnet_id              = module.vpc.public_subnets[1]
+  subnet_id              = module.vpc.public_subnets[count.index]
   vpc_security_group_ids = [aws_security_group.ssh.id]
 
   tags = {
@@ -154,7 +154,7 @@
   ami                    = data.aws_ami.linux.id
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.devops_project.key_name
-  subnet_id              = module.vpc.public_subnets[2]
+  subnet_id              = module.vpc.public_subnets[count.index]
   vpc_security_group_ids = [aws_security_group.ssh.id]
 
   tags = {
@@ -174,7 +174,7 @@
   ami                    = data.aws_ami.ubuntu_24.id
   instance_type          = "t2.small"
   key_name               = aws_key_pair.devops_project.key_name
-  subnet_id              = module.vpc.public_subnets[0]
+  subnet_id              = module.vpc.public_subnets[count.index]
   vpc_security_group_ids = [aws_security_group.ssh.id, aws_security_group.jenkins_master.id]
   iam_instance_profile   = aws_iam_instance_profile.jenkins_instance_profile.name
 
@@ -202,7 +202,7 @@
   ami                    = data.aws_ami.ubuntu_24.id
   instance_type          = "t2.small"
   key_name               = aws_key_pair.devops_project.key_name
-  subnet_id              = module.vpc.public_subnets[1]
+  subnet_id              = module.vpc.public_subnets[count.index]
   vpc_security_group_ids = [aws_security_group.ssh.id, aws_security_group.jenkins_master.id]
   iam_instance_profile   = aws_iam_instance_profile.jenkins_instance_profile.name
 
@@ -237,7 +237,7 @@
   ami                    = data.aws_ami.linux.id
   instance_type          = "t2.medium"
   key_name               = aws_key_pair.devops_project.key_name
-  subnet_id              = module.vpc.public_subnets[1]
+  subnet_id              = module.vpc.public_subnets[count.index]
   vpc_security_group_ids = [aws_security_group.ssh.id, aws_security_group.nexus.id]
   iam_instance_profile   = aws_iam_instance_profile.jenkins_instance_profile.name
 
@@ -264,7 +264,7 @@
   ami                    = data.aws_ami.ubuntu_24.id
   instance_type          = "t2.medium"
   key_name               = aws_key_pair.devops_project.key_name
-  subnet_id              = module.vpc.public_subnets[2]
+  subnet_id              = module.vpc.public_subnets[count.index]
   vpc_security_group_ids = [aws_security_group.ssh.id, aws_security_group.sonarqube.id]
   iam_instance_profile   = aws_iam_instance_profile.jenkins_instance_profile.name
 
@@ -290,11 +290,11 @@
 
 # Create two Jenkins Ansible deployment nodes for stage and prod environments
 /*resource "aws_instance" "jenkins_ansible_deployment" {
-  count = 2
+  count                  = 2
   instance_type          = "t2.micro"
   ami                    = data.aws_ami.ubuntu_24.id
   key_name               = aws_key_pair.devops_project.key_name
-  subnet_id              = module.vpc.public_subnets[0]
+  subnet_id              = module.vpc.public_subnets[count.index]
   vpc_security_group_ids = [aws_security_group.ssh.id]
 
   tags = {
