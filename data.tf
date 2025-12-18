@@ -49,3 +49,7 @@ data "aws_ami" "linux" {
 
   owners = ["137112412989"] # Amazon
 }
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
