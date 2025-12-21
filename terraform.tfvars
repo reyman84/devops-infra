@@ -1,6 +1,6 @@
 region   = "us-east-1"
-VPC_NAME = "vprofile_dev"
-PROJECT  = "vprofile_dev"
+VPC_NAME = "vprofile_module"
+PROJECT  = "vprofile_module"
 
 Zone1 = "us-east-1a"
 Zone2 = "us-east-1b"

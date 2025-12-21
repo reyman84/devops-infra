@@ -17,7 +17,7 @@ module "security_groups" {
   trusted_ip = var.trusted_ip
 }
 
-module "docker" {
+/*module "docker" {
   source = "./modules/ec2"
 
   name           = "Docker-Engine"
@@ -35,7 +35,7 @@ module "docker" {
   user_data = file("modules/ec2/installation_scripts/docker_install.sh")
 }
 
-/*module "minikube" {
+module "minikube" {
   source = "./modules/ec2"
 
   name           = "k8s-minikube"

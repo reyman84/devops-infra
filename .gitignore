@@ -1,7 +1,6 @@
 .terraform/*
 .terraform.lock.hcl
 #terraform.tfvars
-outputs.tf
 key-files/README.md
 key-files/ansible
 key-files/ansible.pub
@@ -9,5 +8,3 @@ key-files/devops_project
 key-files/devops_project.pub
 key-files/id_ed25519
 key-files/id_ed25519.pub
-vm_status.tf
-CI CD use-case.docx
