@@ -1,13 +1,12 @@
-# VPC
-module "vpc" {
+module "this" {
   source = "terraform-aws-modules/vpc/aws"
 
   name = var.VPC_NAME
   cidr = var.VpcCIDR
 
-  azs = [var.Zone1, var.Zone2, var.Zone3]
-  #private_subnets = [var.PrivSub1CIDR, var.PrivSub2CIDR, var.PrivSub3CIDR]
-  public_subnets = [var.PubSub1CIDR, var.PubSub2CIDR, var.PubSub3CIDR]
+  azs             = var.azs
+  public_subnets  = var.public_subnets
+  private_subnets = var.private_subnets
 
   #enable_nat_gateway      = true
   #single_nat_gateway      = true
@@ -21,11 +20,6 @@ module "vpc" {
   }
 }
 
-###############
-## Key-Pairs ##
-###############
-
-# --------------------- Single Key for all servers --------------------- #
 resource "aws_key_pair" "devops_project" {
   key_name   = "devops_project"
   public_key = file("key-files/devops_project.pub")
