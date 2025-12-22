@@ -22,9 +22,6 @@ envs/PROD/keypair/prod_key
 envs/PROD/keypair/prod_key.pub
 
 envs/PROD/.terraform*
-# Ignore other potential key files in keypair folders
-envs/*/keypair/*_key
-envs/*/keypair/*.pub
 
 # -----------------------------
 # IDE / Editor files
