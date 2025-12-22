@@ -1,11 +1,40 @@
-# Terraform
-**/.terraform/*
-**/.terraform.lock.hcl
-**/*.tfstate
-**/*.tfstate.backup
+# -----------------------------
+# Terraform-specific files
+# -----------------------------
+# Ignore Terraform local directories and state
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars      # Ignore variable files if they contain secrets
 
-# Sensitive files
-**/*.pem
-**/*.key
-**/key-files/*
+# Ignore crash logs
+crash.log
+
+# -----------------------------
+# Environment-specific keys
+# -----------------------------
+# DEV keys
+envs/DEV/keypair/devops_project
+envs/DEV/keypair/devops_project.pub
+envs/DEV/.terraform*
+# PROD keys
+envs/PROD/keypair/prod_key
+envs/PROD/keypair/prod_key.pub
+
+envs/PROD/.terraform*
+# Ignore other potential key files in keypair folders
+envs/*/keypair/*_key
+envs/*/keypair/*.pub
+
+# -----------------------------
+# IDE / Editor files
+# -----------------------------
+.vscode/
+*.swp
+*.bak
+
+# -----------------------------
+# Optional: Ignore shell script outputs
+# -----------------------------
+*.out
 
