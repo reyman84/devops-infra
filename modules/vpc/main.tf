@@ -19,8 +19,3 @@ module "this" {
     Project = var.PROJECT
   }
 }
-
-resource "aws_key_pair" "devops_project" {
-  key_name   = "devops_project"
-  public_key = file("key-files/devops_project.pub")
-}
