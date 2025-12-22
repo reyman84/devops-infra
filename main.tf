@@ -1,21 +1,6 @@
-module "vpc" {
-  source = "./modules/vpc"
 
-  VPC_NAME = var.VPC_NAME
-  VpcCIDR  = var.VpcCIDR
 
-  azs             = [var.Zone1, var.Zone2, var.Zone3]
-  public_subnets  = [var.PubSub1CIDR, var.PubSub2CIDR, var.PubSub3CIDR]
-  private_subnets = [var.PrivSub1CIDR, var.PrivSub2CIDR, var.PrivSub3CIDR]
 
-  PROJECT = var.PROJECT
-}
-
-module "security_groups" {
-  source     = "./modules/security_groups"
-  vpc_id     = module.vpc.vpc_id
-  trusted_ip = var.trusted_ip
-}
 
 /*module "docker" {
   source = "./modules/ec2"
