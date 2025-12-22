@@ -1,73 +1,18 @@
-variable "region" {
-  description = "Provides the AWS region to implement changes"
-  default     = "us-east-1"
-}
+variable "region" {}
+variable "VpcCIDR" {}
+variable "VPC_NAME" {}
 
-variable "trusted_ip" {
-  description = "IP address of my Laptop's IP"
-  default     = "49.207.50.91/32"
-}
+variable "Zone1" {}
+variable "Zone2" {}
+variable "Zone3" {}
 
-variable "VPC_NAME" {
-  default = "Terraform-VPC"
-}
+variable "PubSub1CIDR" {}
+variable "PubSub2CIDR" {}
+variable "PubSub3CIDR" {}
 
-variable "Zone1" {
-  default = "us-east-1a"
-}
+variable "PrivSub1CIDR" {}
+variable "PrivSub2CIDR" {}
+variable "PrivSub3CIDR" {}
 
-variable "Zone2" {
-  default = "us-east-1b"
-}
-
-variable "Zone3" {
-  default = "us-east-1c"
-}
-
-variable "VpcCIDR" {
-  default = "172.21.0.0/16"
-}
-
-variable "PubSub1CIDR" {
-  default = "172.21.1.0/24"
-}
-
-variable "PubSub2CIDR" {
-  default = "172.21.2.0/24"
-}
-
-variable "PubSub3CIDR" {
-  default = "172.21.3.0/24"
-}
-
-variable "PrivSub1CIDR" {
-  default = "172.21.4.0/24"
-}
-
-variable "PrivSub2CIDR" {
-  default = "172.21.5.0/24"
-}
-
-variable "PrivSub3CIDR" {
-  default = "172.21.6.0/24"
-}
-
-variable "PROJECT" {
-  default = "vprofile"
-}
-
-/*variable "ami" {
-  description = "AMI value for different types of instances"
-  type        = map(string)
-}
-
-variable "instance_count" {
-  description = "Number of instances"
-  type        = map(string)
-}
-
-variable "devops_password" {
-  description = "Password for devops user"
-  type        = string
-  sensitive   = true
-}*/
+variable "PROJECT" {}
+variable "trusted_ip" {}
