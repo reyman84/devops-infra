@@ -102,21 +102,42 @@ module "jenkins_agent" {
   user_data = file("jenkins_agent.sh")
 }*/
 
+locals {
+  ansible_hosts = {
+    ansible1 = {
+      role      = "controller"
+      ami_id    = data.aws_ami.ubuntu_24.id
+      subnet_id = module.vpc.public_subnets[0]
+      #user_data = file("../../modules/ec2/installation_scripts/ansible.sh")
+    }
+    ansible2 = {
+      role      = "node1"
+      ami_id    = data.aws_ami.ubuntu_22.id
+      subnet_id = module.vpc.public_subnets[1]
+    }
+    ansible3 = {
+      role      = "node2"
+      ami_id    = data.aws_ami.linux.id
+      subnet_id = module.vpc.public_subnets[2]
+    }
+  }
+}
+
 module "ansible" {
   source = "../../modules/ec2"
 
-  for_each = {
-    ansible1 = module.vpc.public_subnets[0]
-    #ansible2 = module.vpc.public_subnets[1]
-    #ansible3 = module.vpc.public_subnets[2]
-  }
+  for_each = local.ansible_hosts
 
   name               = "${var.PROJECT}-${each.key}"
-  ami_id             = data.aws_ami.ubuntu_24.id
+  ami_id             = each.value.ami_id
+  subnet_id          = each.value.subnet_id
   instance_type      = var.instance_type
   key_name           = aws_key_pair.dev.key_name
-  subnet_id          = each.value
-  security_group_ids = [ module.security_groups.ssh_sg_id ]
+  security_group_ids = [module.security_groups.ssh_sg_id]
 
-  #user_data = file("../../modules/ec2/installation_scripts/docker_install.sh")
+  user_data = lookup(each.value, "user_data", null)
+
+  tags = {
+    Role = each.value.role
+  }
 }
