@@ -30,10 +30,10 @@ echo "PS1='\[\e[0;32m\]\u\[\e[0m\]@\[\e[0;35m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m
 sudo -u ubuntu bash -c 'echo "PS1=\"\[\e[0;32m\]\u\[\e[0m\]@\[\e[0;35m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ \"" >> ~/.bashrc'
 
 # Clone Vprofile repository
-sudo -i -u ubuntu bash -c '
-  mkdir -p ~/vprofile &&
-  cd ~/vprofile &&
-  mkdir -p ~/.ssh &&
-  ssh-keyscan github.com >> ~/.ssh/known_hosts &&
-  git clone https://github.com/reyman84/ansible.git
-'
+#sudo -i -u ubuntu bash -c '
+#  mkdir -p ~/vprofile &&
+#  cd ~/vprofile &&
+#  mkdir -p ~/.ssh &&
+#  ssh-keyscan github.com >> ~/.ssh/known_hosts &&
+#  git clone https://github.com/reyman84/ansible.git
+#'
