@@ -1,5 +1,5 @@
 # IAM Role for EC2 to Access S3
-resource "aws_iam_role" "jenkins_ec2_role" {
+/*resource "aws_iam_role" "jenkins_ec2_role" {
   name = "jenkins-ec2-role"
 
   assume_role_policy = jsonencode({
@@ -47,4 +47,35 @@ resource "aws_iam_role_policy_attachment" "attach" {
 resource "aws_iam_instance_profile" "jenkins_instance_profile" {
   name = "jenkins-instance-profile"
   role = aws_iam_role.jenkins_ec2_role.name
+}*/
+
+############################################
+# Administrator Role for Ansible Controller
+############################################
+
+resource "aws_iam_role" "admin_role" {
+  name = "admin-access-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "admin_access" {
+  role       = aws_iam_role.admin_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
+resource "aws_iam_instance_profile" "admin_instance_profile" {
+  name = "admin-instance-profile"
+  role = aws_iam_role.admin_role.name
 }
