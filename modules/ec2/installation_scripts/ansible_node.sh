@@ -35,4 +35,3 @@ echo "Password set for user '$USERNAME'"
 # OPTIONAL: Add user to sudo group
 usermod -aG sudo "$USERNAME"
 echo "User '$USERNAME' added to sudo group"
-
