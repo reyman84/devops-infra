@@ -102,42 +102,81 @@ module "jenkins_agent" {
   user_data = file("jenkins_agent.sh")
 }*/
 
+module "iam" {
+  source = "../../global/iam"
+}
+
 locals {
-  ansible_hosts = {
-    ansible1 = {
-      role      = "controller"
-      ami_id    = data.aws_ami.ubuntu_24.id
-      subnet_id = module.vpc.public_subnets[0]
-      #user_data = file("../../modules/ec2/installation_scripts/ansible.sh")
+
+  controller = {
+    name        = "controller"
+    role        = "controller"
+    ami_id      = data.aws_ami.ubuntu_24.id
+    subnet_name = "public-a"
+    user_data   = file("../../modules/ec2/installation_scripts/ansible_controller.sh")
+    iam_profile = module.iam.admin_instance_profile_name
+  }
+
+  environments = {
+    dev = {
+      ami_id      = data.aws_ami.ubuntu_22.id
+      subnet_name = "public-a"
     }
-    ansible2 = {
-      role      = "node1"
-      ami_id    = data.aws_ami.ubuntu_22.id
-      subnet_id = module.vpc.public_subnets[1]
+    stage = {
+      ami_id      = data.aws_ami.linux.id
+      subnet_name = "public-b"
     }
-    ansible3 = {
-      role      = "node2"
-      ami_id    = data.aws_ami.linux.id
-      subnet_id = module.vpc.public_subnets[2]
+    prod = {
+      ami_id      = data.aws_ami.linux.id
+      subnet_name = "public-c"
     }
   }
 }
 
-module "ansible" {
+locals {
+  subnet_map = {
+    public-a = module.vpc.public_subnets[0]
+    public-b = module.vpc.public_subnets[1]
+    public-c = module.vpc.public_subnets[2]
+  }
+}
+
+module "controller" {
   source = "../../modules/ec2"
 
-  for_each = local.ansible_hosts
-
-  name               = "${var.PROJECT}-${each.key}"
-  ami_id             = each.value.ami_id
-  subnet_id          = each.value.subnet_id
+  name               = "${var.PROJECT}-controller"
+  ami_id             = local.controller.ami_id
+  subnet_id          = local.subnet_map[local.controller.subnet_name]
   instance_type      = var.instance_type
   key_name           = aws_key_pair.dev.key_name
   security_group_ids = [module.security_groups.ssh_sg_id]
 
-  user_data = lookup(each.value, "user_data", null)
+  iam_instance_profile = local.controller.iam_profile
+  user_data            = local.controller.user_data
 
   tags = {
-    Role = each.value.role
+    Role = "controller"
+    Env  = "shared"
+  }
+}
+
+
+module "nodes" {
+  source = "../../modules/ec2"
+
+  for_each = local.environments
+
+  name               = "${var.PROJECT}-${each.key}"
+  ami_id             = each.value.ami_id
+  subnet_id          = local.subnet_map[each.value.subnet_name]
+  instance_type      = var.instance_type
+  key_name           = aws_key_pair.dev.key_name
+  security_group_ids = [module.security_groups.ssh_sg_id]
+
+  user_data = file("../../modules/ec2/installation_scripts/ansible_node.sh")
+
+  tags = {
+    Role = each.key
+    Env  = each.key
   }
 }
