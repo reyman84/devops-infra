@@ -1,0 +1,14 @@
+plugin: amazon.aws.aws_ec2
+
+regions:
+  - us-east-1
+
+filters:
+  instance-state-name: running
+  "tag:Role":
+    - stage
+
+hostnames:
+  - private-dns-name
+
+hostvars_prefix: ec2_
