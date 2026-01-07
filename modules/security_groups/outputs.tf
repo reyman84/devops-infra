@@ -2,10 +2,10 @@
 #           Security Group Outputs
 ##########################################
 
-/*output "allow_all_sg_id" {
+output "allow_all_sg_id" {
   description = "Allow all traffic security group ID"
   value       = aws_security_group.allow_all.id
-}*/
+}
 
 output "ssh_sg_id" {
   description = "SSH security group ID"
