@@ -6,9 +6,16 @@ regions:
 filters:
   instance-state-name: running
   "tag:Role":
+    - dev
     - stage
+#    - prod
 
 hostnames:
   - private-dns-name
 
 hostvars_prefix: ec2_
+
+groups:
+  dev: ec2_tags.Role == 'dev'
+  stage: ec2_tags.Role == 'stage'
+  prod: ec2_tags.Role == 'prod'
