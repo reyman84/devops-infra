@@ -18,4 +18,4 @@ hostvars_prefix: ec2_
 groups:
   dev: ec2_tags.Role == 'dev'
   stage: ec2_tags.Role == 'stage'
-  prod: ec2_tags.Role == 'prod'
+#  prod: ec2_tags.Role == 'prod'

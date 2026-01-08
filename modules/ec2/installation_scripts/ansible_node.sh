@@ -17,21 +17,39 @@ sudo -u ubuntu bash -c 'echo "PS1=\"\[\e[0;32m\]\u\[\e[0m\]@\[\e[0;35m\]\h\[\e[0
 ######################################
 
 USERNAME="ansible"
-PASSWORD="Khalsa_1699"
 
-# Check if user already exists
-if id "$USERNAME" &>/dev/null; then
-    echo "User '$USERNAME' already exists"
+# Detect OS and assign sudo group
+if grep -qi "amazon linux" /etc/os-release; then
+    SUDO_GROUP="wheel"
+elif grep -qi "ubuntu" /etc/os-release; then
+    SUDO_GROUP="sudo"
 else
-    # Create user with home directory and bash shell
-    useradd -m -s /bin/bash "$USERNAME"
-    echo "User '$USERNAME' created"
+    echo "Unknown OS, defaulting to sudo group"
+    SUDO_GROUP="sudo"
 fi
 
-# Set password
-echo "$USERNAME:$PASSWORD" | chpasswd
-echo "Password set for user '$USERNAME'"
+# Create user if not exists
+id $USERNAME &>/dev/null || useradd -m -s /bin/bash $USERNAME
 
-# OPTIONAL: Add user to sudo group
-usermod -aG sudo "$USERNAME"
-echo "User '$USERNAME' added to sudo group"
+# Add user to correct group and setup sudoers
+usermod -aG $SUDO_GROUP $USERNAME
+echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ansible
+chmod 440 /etc/sudoers.d/ansible
+
+# SSH
+mkdir -p /home/$USERNAME/.ssh
+##############################
+# Yet to fix public key issue
+##############################
+#cat <<EOF > /home/$USERNAME/.ssh/authorized_keys
+#${ansible_public_key}
+#EOF
+chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh
+chmod 700 /home/$USERNAME/.ssh
+chmod 600 /home/$USERNAME/.ssh/authorized_keys
+
+# Customize prompt idempotently
+grep -q "PS1=.*\\u@" /home/$USERNAME/.bashrc || \
+sudo -u $USERNAME bash -c 'echo "PS1=\"\[\e[0;32m\]\u\[\e[0m\]@\[\e[0;35m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ \"" >> ~/.bashrc'
+
+echo "Node ready"

@@ -8,7 +8,7 @@ exec > /var/log/user-data.log 2>&1
 echo "PS1='\[\e[0;32m\]\u\[\e[0m\]@\[\e[0;35m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ '" >> /root/.bashrc
 sudo -u ubuntu bash -c 'echo "PS1=\"\[\e[0;32m\]\u\[\e[0m\]@\[\e[0;35m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ \"" >> ~/.bashrc'
 
-hostnamectl set-hostname ansible-controller
+hostnamectl set-hostname controller
 
 ######################################
 # Install AWS CLI
@@ -24,31 +24,24 @@ aws --version
 # Create ansible user
 ######################################
 USERNAME="ansible"
-PASSWORD="Khalsa_1699"
-HOME_DIR="/home/${USERNAME}"
 
-if ! id "${USERNAME}" &>/dev/null; then
-  useradd -m -s /bin/bash "${USERNAME}"
-fi
+id $USERNAME &>/dev/null || useradd -m -s /bin/bash ansible
+usermod -aG sudo ansible
 
-echo "${USERNAME}:${PASSWORD}" | chpasswd
-usermod -aG sudo "${USERNAME}"
+echo "ansible ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ansible
+chmod 440 /etc/sudoers.d/ansible
+sudo -u $USERNAME bash -c 'echo "PS1=\"\[\e[0;32m\]\u\[\e[0m\]@\[\e[0;35m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ \"" >> ~/.bashrc'
 
 ######################################
-# SSH keys for ansible user
+# SSH keys
 ######################################
-mkdir -p ${HOME_DIR}/.ssh
-chmod 700 ${HOME_DIR}/.ssh
-chown -R ${USERNAME}:${USERNAME} ${HOME_DIR}/.ssh
+sudo -u $USERNAME mkdir -p /home/$USERNAME/.ssh
+sudo -u $USERNAME ssh-keygen -t rsa -b 4096 -f /home/$USERNAME/.ssh/id_rsa -N "" -C "ansible@controller"
 
-sudo -u ${USERNAME} ssh-keygen -t rsa -b 4096 \
-  -f ${HOME_DIR}/.ssh/id_rsa \
-  -N "" \
-  -C "ansible@controller"
-
-chmod 600 ${HOME_DIR}/.ssh/id_rsa
-chmod 644 ${HOME_DIR}/.ssh/id_rsa.pub
-chown ${USERNAME}:${USERNAME} ${HOME_DIR}/.ssh/id_rsa*
+chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh
+chmod 700 /home/$USERNAME/.ssh
+chmod 600 /home/$USERNAME/.ssh/id_rsa
+chmod 644 /home/$USERNAME/.ssh/id_rsa.pub
 
 ######################################
 # Python + Ansible dependencies
@@ -58,7 +51,7 @@ apt install -y python3 python3-pip python3-venv build-essential software-propert
 ######################################
 # Create Ansible venv as ansible user
 ######################################
-sudo -u ${USERNAME} bash << 'EOF'
+sudo -u $USERNAME bash << 'EOF'
 set -euxo pipefail
 cd ~
 
