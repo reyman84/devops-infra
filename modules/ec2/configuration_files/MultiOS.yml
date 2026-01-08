@@ -1,0 +1,183 @@
+# -------------------------------------------------------------------------
+# Playbook  : Multi-Environment Web Server Configuration
+# Purpose   : Perform global user/group management and configure
+#             environment-specific web servers using Ansible.
+#
+# Environments:
+#   - dev   : Ubuntu (Debian-based) with Nginx and Apache2
+#   - stage : RHEL-based with Apache (httpd)
+#
+# Inventory : Dynamic AWS EC2 inventory (amazon.aws.aws_ec2 plugin)
+# -------------------------------------------------------------------------
+
+
+#!/home/ansible/ansible/DEV/bin/ansible-playbook
+#
+- name: "Global Tasks"
+  hosts: all
+  become: yes
+  gather_facts: false
+  tags: global
+
+  vars:
+    USER_GROUP_MAP:
+      Ramandeep: Amritsar
+      Ganeev: Punjab
+      Manpreet: India
+
+  tasks:
+    - name: Create groups first
+      ansible.builtin.group:
+        name: "{{ item.value }}"
+        state: present
+      loop: "{{ USER_GROUP_MAP | dict2items }}"
+
+    - name: Create users and map with Groups
+      ansible.builtin.user:
+        name: "{{ item.key }}"
+        group: "{{ item.value }}"
+        state: present
+        create_home: yes
+      loop: "{{ USER_GROUP_MAP | dict2items }}"
+
+######################### ENV: Dev #########################
+######################## OS: Ubuntu ########################
+
+- name: "'Debian' based installation and configuration"
+  hosts: dev
+  become: yes
+  gather_facts: true
+
+  vars:
+    Debian_OS: [ 'nginx', 'apache2' ]
+
+  tasks:
+    - name: Install Debian packages
+      ansible.builtin.apt:
+        name: "{{ Debian_OS }}"
+        state: present
+        update_cache: yes
+
+    - name: Deploy nginx default site config
+      ansible.builtin.template:
+        src: /home/ansible/ansible/templates/nginx.conf
+        dest: /etc/nginx/sites-available/default
+        owner: root
+        group: root
+        mode: '0644'
+      notify: 
+        - Validate nginx config 
+        - Restart nginx
+
+    - name: Ensure nginx sites-enabled directory exists
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Enable nginx default site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/default
+        dest: /etc/nginx/sites-enabled/default
+        state: link
+        force: yes
+
+    - name: Find nginx backup files in sites-enabled
+      ansible.builtin.find:
+        paths: /etc/nginx/sites-enabled
+        patterns: "*~"
+      register: nginx_backup_files
+
+    - name: Remove nginx backup files from sites-enabled
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ nginx_backup_files.files }}"
+      when: nginx_backup_files.matched > 0
+
+    - name: Copy index.html
+      ansible.builtin.copy:
+        src: index_ubuntu
+        dest: /usr/share/nginx/html/index.html
+      notify: Restart nginx
+
+    - name: Testing 'blockinfile' module
+      blockinfile:
+        path: /usr/share/nginx/html/index.html
+        marker: '# {mark} BLOCKINFILE'
+        block: |
+          <h1>Working on 'blockinfile' ansible module</h1>
+      notify: Restart nginx
+
+    - name: Gather service facts
+      service_facts:
+
+    - name: Stop Apache2
+      ansible.builtin.service:
+        name: apache2
+        state: stopped
+      when:
+        - "'apache2.service' in ansible_facts.services"
+        - ansible_facts.services['apache2.service'].state != 'stopped'
+
+    - name: Status of application service_facts
+      debug:
+        msg:
+          - "Nginx is {{ ansible_facts.services['nginx'].state }}"
+          - "Apache2 is {{ ansible_facts.services['apache2'].state }}"
+
+  handlers:  
+    - name: Validate nginx config
+      command: nginx -t
+
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted
+
+######################### ENV: stage #########################
+########################## OS: RHEL ##########################
+
+- name: "'RHEL' based installation and configuration"
+  hosts: stage
+  become: yes
+  gather_facts: true
+
+  vars:
+    RHEL_OS: [ 'vim', 'gzip', 'httpd' ]
+
+  tasks: 
+
+    - name: Install RHEL packages
+      ansible.builtin.yum:
+        name: '{{ item }}'
+        state: present
+      loop: '{{ RHEL_OS }}'
+
+    - name: Copy index.html from local to remote
+      copy:
+        src: index_AL
+        dest: /var/www/html/index.html
+      notify: Start httpd service
+    
+    - name: Gather Service Facts
+      service_facts:
+
+    - name: RHEL service status
+      debug:
+        msg: "HTTPD is {{ ansible_facts.services['httpd.service'].state }}"
+
+    - name: lineinfile module in Ansible
+      lineinfile:
+        path: /var/www/html/index.html
+        line: "# Addition of 'lineinfile' module for testing"
+        insertafter: EOF
+
+  handlers:
+    - name: Start httpd service
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
+        enabled: yes
