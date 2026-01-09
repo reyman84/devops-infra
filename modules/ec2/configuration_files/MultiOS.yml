@@ -39,38 +39,39 @@
         create_home: yes
       loop: "{{ USER_GROUP_MAP | dict2items }}"
 
-#    - name: Display Group file
-#      slurp:
-#        src: /etc/group
-#      register: group_list
-#
-#    - name: Display group
-#      debug:
-#        msg: "{{group_list.content | b64decode}}"
-#
-#    - name: copy the content to local
-#      copy:
-#        content: "{{group_list.content | b64decode}}"
-#        dest: /tmp/group
-#      delegate_to: localhost
-#      run_once: yes
+    - name: Display Group file
+      ansible.builtin.slurp:
+        src: /etc/group
+      register: group_list
 
-#    - name: Copy log script to Remote servers
-#      copy:
-#        src: "logs_setup.sh"                                # Need to create this file
-#        dest: "/usr/local/logs_setup.sh"
-#        mode: "0755"
-#
-#    - name: Enable a cron on both RHEL and Debian servers
-#      cron:
-#        name: Cron on all servers
-#        minute: "15"
-#        hour: "4"
-#        day: "*"
-#        month: "*"
-#        weekday: "1"
-#        job: "/usr/local/logs_setup.sh"
-#        user: "root"
+    - name: Display group
+      ansible.builtin.debug:
+        msg: "{{group_list.content | b64decode}}"
+
+    - name: Copy the content to local
+      ansible.builtin.copy:
+        content: "{{group_list.content | b64decode}}"
+        dest: /tmp/group
+      delegate_to: localhost
+      run_once: yes
+
+    - name: Copy log script to Remote servers
+      ansible.builtin.copy:
+        dest: "/usr/local/logs_setup.sh"
+        content: |
+          Creating a file/script for testing cronjob
+        mode: "0755"
+
+    - name: Enable a cron on both RHEL and Debian servers
+      ansible.builtin.cron:
+        name: Cron on all servers
+        minute: "15"
+        hour: "4"
+        day: "*"
+        month: "*"
+        weekday: "1"
+        job: "/usr/local/logs_setup.sh"
+        user: "root"
 
 ######################### ENV: Dev #########################
 ######################## OS: Ubuntu ########################
@@ -91,9 +92,23 @@
         update_cache: yes
 
     - name: Deploy nginx default site config
-      ansible.builtin.template:
-        src: /home/ansible/ansible/templates/nginx.conf     # Need to create this file
+      ansible.builtin.copy:
         dest: /etc/nginx/sites-available/default
+        content: |
+          server {
+          listen 80 default_server;
+          listen [::]:80 default_server;
+
+          root /usr/share/nginx/html;
+
+          index index.html index.htm index.nginx-debian.html;
+
+          server_name _;
+
+          location / {
+                  try_files $uri $uri/ =404;
+            }
+          }
         owner: root
         group: root
         mode: '0644'
@@ -129,22 +144,33 @@
       loop: "{{ nginx_backup_files.files }}"
       when: nginx_backup_files.matched > 0
 
-    - name: Copy index.html
+    - name: Create index.html for nginx
       ansible.builtin.copy:
-        src: index_ubuntu                                   # Need to create this file
         dest: /usr/share/nginx/html/index.html
-      notify: Restart nginx
+        content: |
+          <html>
+          <body>
+            Nginx Server - {{ inventory_hostname }}
+            <p>Environment: Dev</p>
+          </body>
+          </html>
+        owner: root
+        group: root
+        mode: '0644'
+      notify: 
+        - Validate nginx config
+        - Restart nginx
 
-    - name: Testing 'blockinfile' module
-      blockinfile:
-        path: /usr/share/nginx/html/index.html
-        marker: '# {mark} BLOCKINFILE'
-        block: |
-          <h1>Working on 'blockinfile' ansible module</h1>
-      notify: Restart nginx
+#    - name: Testing 'blockinfile' module
+#      ansible.builtin.blockinfile:
+#        path: /usr/share/nginx/html/index.html
+#        marker: '# {mark} BLOCKINFILE'
+#        block: |
+#          <h1>Working on 'blockinfile' ansible module</h1>
+#      notify: Restart nginx
 
     - name: Gather service facts
-      service_facts:
+      ansible.builtin.service_facts:
 
     - name: Stop Apache2
       ansible.builtin.service:
@@ -155,17 +181,17 @@
         - ansible_facts.services['apache2.service'].state != 'stopped'
 
     - name: Status of application service_facts
-      debug:
+      ansible.builtin.debug:
         msg:
           - "Nginx is {{ ansible_facts.services['nginx'].state }}"
           - "Apache2 is {{ ansible_facts.services['apache2'].state }}"
 
   handlers:  
     - name: Validate nginx config
-      command: nginx -t
+      ansible.builtin.command: nginx -t
 
     - name: Restart nginx
-      service:
+      ansible.builtin.service:
         name: nginx
         state: restarted
 
@@ -188,24 +214,33 @@
         state: present
       loop: '{{ RHEL_OS }}'
 
-    - name: Copy index.html from local to remote
-      copy:
-        src: index_AL                                       # Need to create this file
+    - name: Create index.html for httpd
+      ansible.builtin.copy:
         dest: /var/www/html/index.html
-      notify: Start httpd service
+        content: |
+          <html>
+          <body>
+            HTTPD Server - {{ inventory_hostname }}
+            <p>Environment: Dev</p>
+          </body>
+          </html>
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Start httpd service 
     
     - name: Gather Service Facts
-      service_facts:
+      ansible.builtin.service_facts:
 
     - name: RHEL service status
-      debug:
+      ansible.builtin.debug:
         msg: "HTTPD is {{ ansible_facts.services['httpd.service'].state }}"
 
-    - name: lineinfile module in Ansible
-      lineinfile:
-        path: /var/www/html/index.html
-        line: "# Addition of 'lineinfile' module for testing"
-        insertafter: EOF
+#    - name: lineinfile module in Ansible
+#      ansible.builtin.lineinfile:
+#        path: /var/www/html/index.html
+#        line: "# Addition of 'lineinfile' module for testing"
+#        insertafter: EOF
 
   handlers:
     - name: Start httpd service
