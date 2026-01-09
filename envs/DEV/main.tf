@@ -171,7 +171,7 @@ module "nodes" {
   subnet_id          = local.subnet_map[each.value.subnet_name]
   instance_type      = var.instance_type
   key_name           = aws_key_pair.dev.key_name
-  security_group_ids = [module.security_groups.ssh_sg_id]
+  security_group_ids = [module.security_groups.ssh_sg_id, module.security_groups.allow_all_sg_id]
 
   user_data = file("../../modules/ec2/installation_scripts/ansible_node.sh")
 
