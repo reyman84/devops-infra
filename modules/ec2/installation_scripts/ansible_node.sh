@@ -3,7 +3,7 @@
 ######################################
 # Install packages, in Amazon-linux
 ######################################
-yum install -y vim > /dev/null
+yum install -y vim cronie > /dev/null
 
 ######################################
 # Customize prompt
