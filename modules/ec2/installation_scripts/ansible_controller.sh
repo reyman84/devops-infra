@@ -70,4 +70,59 @@ pip3 install boto3 botocore
 python3 -c "import boto3; print('boto3 OK')"
 EOF
 
+######################################
+# Bootstrap Ansible files (NO execution)
+######################################
+sudo -u ansible bash << 'EOF'
+set -euxo pipefail
+
+BASE=/home/ansible/ansible
+
+mkdir -p $BASE/playbooks
+mkdir -p $BASE/inventory
+
+######################################
+# ansible.cfg
+######################################
+cat << 'CFG' > $BASE/ansible.cfg
+[defaults]
+inventory = /home/ansible/ansible/inventory/aws_ec2.yaml
+host_key_checking = false
+remote_user = ansible
+interpreter_python = /usr/bin/python3
+deprecation_warnings = False
+
+[inventory]
+enable_plugins = host_list, ini, yaml, toml, script, auto
+CFG
+
+######################################
+# aws_ec2 inventory
+######################################
+
+cat << 'YAML' > $BASE/inventory/aws_ec2.yaml
+plugin: amazon.aws.aws_ec2
+
+regions:
+  - us-east-1
+
+filters:
+  instance-state-name: running
+  "tag:Role":
+    - dev
+    - stage
+
+hostnames:
+  - private-dns-name
+
+hostvars_prefix: ec2_
+
+groups:
+  dev: ec2_tags.Role == 'dev'
+  stage: ec2_tags.Role == 'stage'
+YAML
+
+chown -R ansible:ansible $BASE
+EOF
+
 echo "Ansible controller bootstrap completed"
