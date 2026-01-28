@@ -4,7 +4,7 @@ module "this" {
   name = var.VPC_NAME
   cidr = var.VpcCIDR
 
-  azs             = var.azs
+  azs  = slice(data.aws_availability_zones.available.names, 0, 3)
   public_subnets  = var.public_subnets
   #private_subnets = var.private_subnets
 
