@@ -4,7 +4,7 @@
 
 # Allow All Traffic (Inbound + Outbound)
 # OPTIONAL — disabled
-resource "aws_security_group" "allow_all" {
+/*resource "aws_security_group" "allow_all" {
   name        = "allow_all_traffic"
   description = "Allow all inbound and outbound traffic"
   vpc_id      = var.vpc_id
@@ -26,7 +26,7 @@ resource "aws_security_group" "allow_all" {
   tags = {
     Name = "allow_all_traffic"
   }
-}
+}*/
 
 ##########################################
 #       SSH Security Group + Rules
@@ -227,3 +227,88 @@ resource "aws_security_group_rule" "egress_ssh" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.jenkins_master.id
 }*/
+
+##########################################
+#       Monitoring Stack: SG Definitions 
+##########################################
+
+# Grafana SG
+resource "aws_security_group" "grafana" {
+  name        = "grafana-sg"
+  description = "Allow for 3000 for grafana"
+  vpc_id      = var.vpc_id
+
+  ingress {
+      from_port   = 3000
+      to_port     = 3000
+      protocol    = "tcp"
+      cidr_blocks = [var.trusted_ip]
+    }
+
+  egress {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  tags = {
+    Name = "grafana_only_sg"
+  }
+}
+
+resource "aws_security_group" "loki" {
+  name        = "loki-sg"
+  description = "Allow for 9090 for loki"
+  vpc_id      = var.vpc_id
+
+  ingress {
+      from_port   = 3100
+      to_port     = 3100
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  egress {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  tags = {
+    Name = "loki_only_sg"
+  }
+}
+
+resource "aws_security_group" "prometheus" {
+  name        = "prometheus-sg"
+  description = "Prometheus security group"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = "prometheus_only_sg"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prometheus_ui" {
+  security_group_id = aws_security_group.prometheus.id
+  cidr_ipv4         = var.trusted_ip
+  from_port         = 9090
+  to_port           = 9090
+  ip_protocol       = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prometheus_from_grafana" {
+  security_group_id            = aws_security_group.prometheus.id
+  referenced_security_group_id = aws_security_group.grafana.id
+  from_port                    = 9090
+  to_port                      = 9090
+  ip_protocol                  = "tcp"
+}
+
+resource "aws_vpc_security_group_egress_rule" "prometheus_all_out" {
+  security_group_id = aws_security_group.prometheus.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
