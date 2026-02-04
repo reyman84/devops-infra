@@ -15,7 +15,8 @@ variable "public_subnets" {
 }
 
 variable "private_subnets" {
-  type = list(string)
+  type    = list(string)
+  default = []
 }
 
 variable "PROJECT" {
