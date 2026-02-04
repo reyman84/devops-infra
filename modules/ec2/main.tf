@@ -19,7 +19,7 @@ resource "aws_instance" "this" {
 
   user_data = var.user_data
 
-  dynamic "root_block_device" {
+  /*dynamic "root_block_device" {
     for_each = var.root_block_device != null ? [var.root_block_device] : []
     content {
       volume_size           = root_block_device.value.volume_size
@@ -36,5 +36,5 @@ resource "aws_instance" "this" {
       volume_type           = ebs_block_device.value.volume_type
       delete_on_termination = true
     }
-  }
+  }*/
 }

@@ -2,7 +2,7 @@
 # ansible #
 ###########
 
-output "ansible_private_ip" {
+/*output "ansible_private_ip" {
   value = module.ansible.private_ip
 }
 
@@ -13,7 +13,7 @@ output "ansible_public_ip" {
 ###########
 #  docker #
 ###########
-/*output "docker_private" {
+output "docker_private" {
   value = module.docker.private_ip
 }
 
