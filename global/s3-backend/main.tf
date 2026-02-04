@@ -16,7 +16,7 @@
     Name        = "Terraform Lock Table"
     Environment = "Dev"
   }
-}*/
+}
 
 terraform {
   backend "s3" {
@@ -26,4 +26,4 @@ terraform {
     dynamodb_table = "Terraform_VPC"
     encrypt        = true
   }
-}
+}*/
