@@ -15,7 +15,7 @@ module "vpc" {
 
   azs             = [var.Zone1, var.Zone2, var.Zone3]
   public_subnets  = [var.PubSub1CIDR, var.PubSub2CIDR, var.PubSub3CIDR]
-  private_subnets = [var.PrivSub1CIDR, var.PrivSub2CIDR, var.PrivSub3CIDR]
+  private_subnets = []
 
   PROJECT = var.PROJECT
 }
@@ -106,7 +106,7 @@ module "iam" {
   source = "../../global/iam"
 }
 
-locals {
+/*locals {
 
   controller = {
     name        = "controller"
@@ -179,4 +179,81 @@ module "nodes" {
     Role = each.key
     Env  = each.key
   }
+}*/
+
+/*module "grafana" {
+  source = "../../modules/ec2"
+
+  name               = "grafana"
+  ami_id             = data.aws_ami.ubuntu_24.id
+  instance_type      = var.instance_type
+  key_name           = aws_key_pair.dev.key_name
+  security_group_ids = [  module.security_groups.ssh_sg_id, module.security_groups.grafana_sg_id ]
+  subnet_id = module.vpc.public_subnets[0]
+  user_data = file("../../modules/ec2/installation_scripts/grafana-setup.sh")
+}
+
+module "prometheus" {
+  source = "../../modules/ec2"
+
+  name               = "prometheus"
+  ami_id             = data.aws_ami.ubuntu_24.id
+  instance_type      = var.instance_type
+  key_name           = aws_key_pair.dev.key_name
+  security_group_ids = [  module.security_groups.ssh_sg_id, module.security_groups.prometheus_sg_id ]
+  subnet_id = module.vpc.public_subnets[1]
+  user_data = file("../../modules/ec2/installation_scripts/prometheus-setup.sh")
+}*/
+
+/*module "loki" {
+  source = "../../modules/ec2"
+
+  name               = "loki"
+  ami_id             = data.aws_ami.ubuntu_24.id
+  instance_type      = var.instance_type
+  key_name           = aws_key_pair.dev.key_name
+  security_group_ids = [  module.security_groups.ssh_sg_id, module.security_groups.loki_sg_id ]
+  subnet_id = module.vpc.public_subnets[2]
+  user_data = file("../../modules/ec2/installation_scripts/lokisetup.sh")
+}*/
+
+locals {
+  observability_services = {
+    grafana = {
+      sg_id      = module.security_groups.grafana_sg_id
+      subnet_id = module.vpc.public_subnets[0]
+      user_data = "../../modules/ec2/installation_scripts/grafana-setup.sh"
+    }
+
+    prometheus = {
+      sg_id      = module.security_groups.prometheus_sg_id
+      subnet_id = module.vpc.public_subnets[1]
+      user_data = "../../modules/ec2/installation_scripts/prometheus-setup.sh"
+    }
+
+    loki = {
+      sg_id      = module.security_groups.loki_sg_id
+      subnet_id = module.vpc.public_subnets[2]
+      user_data = "../../modules/ec2/installation_scripts/lokisetup.sh"
+    }
+  }
+}
+
+module "observability" {
+  source = "../../modules/ec2"
+
+  for_each = local.observability_services
+
+  name               = each.key
+  ami_id             = data.aws_ami.ubuntu_24.id
+  instance_type      = var.instance_type
+  key_name           = aws_key_pair.dev.key_name
+
+  security_group_ids = [
+    module.security_groups.ssh_sg_id,
+    each.value.sg_id
+  ]
+
+  subnet_id = each.value.subnet_id
+  user_data = file(each.value.user_data)
 }

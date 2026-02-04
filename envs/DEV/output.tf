@@ -1,4 +1,4 @@
-output "controller_private_ip" {
+/*output "controller_private_ip" {
   value = module.controller.private_ip
 }
 
@@ -19,4 +19,4 @@ output "nodes_public_ips" {
     for k, m in module.nodes :
     k => m.public_ip
   }
-}
+}*/
