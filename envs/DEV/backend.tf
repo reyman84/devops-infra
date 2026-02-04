@@ -20,10 +20,10 @@
 
 terraform {
   backend "s3" {
-    bucket         = "terraform.tfstate2025"
-    key            = "dev"
-    region         = "us-east-1"
-    dynamodb_table = "Terraform_VPC"
-    encrypt        = true
+    bucket = "guru.nanak.jahaz"
+    key    = "dev"
+    region = "us-east-1"
+    #dynamodb_table = "Terraform_VPC"
+    encrypt = true
   }
 }
