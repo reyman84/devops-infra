@@ -312,3 +312,53 @@ resource "aws_vpc_security_group_egress_rule" "prometheus_all_out" {
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
 }
+#========================================
+
+resource "aws_security_group" "webApp" {
+  name        = "webApp-sg"
+  description = "Allow 5000 and 9100 for webApp"
+  vpc_id      = var.vpc_id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "webApp-sg"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "webapp_5000_from_my_ip" {
+  security_group_id = aws_security_group.webApp.id
+  cidr_ipv4         = var.trusted_ip
+  from_port         = 5000
+  to_port           = 5000
+  ip_protocol       = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "webapp_9100_from_my_ip" {
+  security_group_id = aws_security_group.webApp.id
+  cidr_ipv4         = var.trusted_ip
+  from_port         = 9100
+  to_port           = 9100
+  ip_protocol       = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "webapp_5000_from_prometheus" {
+  security_group_id            = aws_security_group.webApp.id
+  referenced_security_group_id = aws_security_group.prometheus.id
+  from_port                    = 5000
+  to_port                      = 5000
+  ip_protocol                  = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "webapp_9100_from_prometheus" {
+  security_group_id            = aws_security_group.webApp.id
+  referenced_security_group_id = aws_security_group.prometheus.id
+  from_port                    = 9100
+  to_port                      = 9100
+  ip_protocol                  = "tcp"
+}

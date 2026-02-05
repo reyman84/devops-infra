@@ -220,21 +220,27 @@ module "prometheus" {
 locals {
   observability_services = {
     grafana = {
-      sg_id      = module.security_groups.grafana_sg_id
+      sg_id     = module.security_groups.grafana_sg_id
       subnet_id = module.vpc.public_subnets[0]
       user_data = "../../modules/ec2/installation_scripts/grafana-setup.sh"
     }
 
     prometheus = {
-      sg_id      = module.security_groups.prometheus_sg_id
+      sg_id     = module.security_groups.prometheus_sg_id
       subnet_id = module.vpc.public_subnets[1]
       user_data = "../../modules/ec2/installation_scripts/prometheus-setup.sh"
     }
 
     loki = {
-      sg_id      = module.security_groups.loki_sg_id
+      sg_id     = module.security_groups.loki_sg_id
       subnet_id = module.vpc.public_subnets[2]
       user_data = "../../modules/ec2/installation_scripts/lokisetup.sh"
+    }
+
+    webnode = {
+      sg_id     = module.security_groups.webApp_sg_id
+      subnet_id = module.vpc.public_subnets[0]
+      user_data = "../../modules/ec2/installation_scripts/webnode_setup.sh"
     }
   }
 }
@@ -244,10 +250,10 @@ module "observability" {
 
   for_each = local.observability_services
 
-  name               = each.key
-  ami_id             = data.aws_ami.ubuntu_24.id
-  instance_type      = var.instance_type
-  key_name           = aws_key_pair.dev.key_name
+  name          = each.key
+  ami_id        = data.aws_ami.ubuntu_24.id
+  instance_type = var.instance_type
+  key_name      = aws_key_pair.dev.key_name
 
   security_group_ids = [
     module.security_groups.ssh_sg_id,

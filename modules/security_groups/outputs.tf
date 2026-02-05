@@ -27,6 +27,12 @@ output "loki_sg_id" {
   value       = aws_security_group.loki.id
 }
 
+output "webApp_sg_id" {
+  description = "Security Group ID for Web Application"
+  value       = aws_security_group.webApp.id
+}
+
+
 /*output "jenkins_master_sg_id" {
   description = "Jenkins master security group ID"
   value       = aws_security_group.jenkins_master.id
