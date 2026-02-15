@@ -47,7 +47,7 @@ resource "aws_iam_role_policy_attachment" "attach" {
 resource "aws_iam_instance_profile" "jenkins_instance_profile" {
   name = "jenkins-instance-profile"
   role = aws_iam_role.jenkins_ec2_role.name
-}
+}*/
 
 ############################################
 # Administrator Role for Ansible Controller
@@ -78,4 +78,4 @@ resource "aws_iam_role_policy_attachment" "admin_access" {
 resource "aws_iam_instance_profile" "admin_instance_profile" {
   name = "admin-instance-profile"
   role = aws_iam_role.admin_role.name
-}*/
+}

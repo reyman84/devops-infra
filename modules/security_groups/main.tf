@@ -4,7 +4,7 @@
 
 # Allow All Traffic (Inbound + Outbound)
 # OPTIONAL — disabled
-/*resource "aws_security_group" "allow_all" {
+resource "aws_security_group" "allow_all" {
   name        = "allow_all_traffic"
   description = "Allow all inbound and outbound traffic"
   vpc_id      = var.vpc_id
@@ -26,7 +26,7 @@
   tags = {
     Name = "allow_all_traffic"
   }
-}*/
+}
 
 ##########################################
 #       SSH Security Group + Rules
@@ -233,7 +233,7 @@ resource "aws_security_group_rule" "egress_ssh" {
 ##########################################
 
 # Grafana SG
-resource "aws_security_group" "grafana" {
+/*resource "aws_security_group" "grafana" {
   name        = "grafana-sg"
   description = "Allow for 3000 for grafana"
   vpc_id      = var.vpc_id
@@ -255,9 +255,9 @@ resource "aws_security_group" "grafana" {
   tags = {
     Name = "grafana_only_sg"
   }
-}
+}*/
 
-resource "aws_security_group" "loki" {
+/*resource "aws_security_group" "loki" {
   name        = "loki-sg"
   description = "Allow for 9090 for loki"
   vpc_id      = var.vpc_id
@@ -279,9 +279,9 @@ resource "aws_security_group" "loki" {
   tags = {
     Name = "loki_only_sg"
   }
-}
+}*/
 
-resource "aws_security_group" "prometheus" {
+/*resource "aws_security_group" "prometheus" {
   name        = "prometheus-sg"
   description = "Prometheus security group"
   vpc_id      = var.vpc_id
@@ -289,32 +289,32 @@ resource "aws_security_group" "prometheus" {
   tags = {
     Name = "prometheus_only_sg"
   }
-}
+}*/
 
-resource "aws_vpc_security_group_ingress_rule" "prometheus_ui" {
+/*resource "aws_vpc_security_group_ingress_rule" "prometheus_ui" {
   security_group_id = aws_security_group.prometheus.id
   cidr_ipv4         = var.trusted_ip
   from_port         = 9090
   to_port           = 9090
   ip_protocol       = "tcp"
-}
+}*/
 
-resource "aws_vpc_security_group_ingress_rule" "prometheus_from_grafana" {
+/*resource "aws_vpc_security_group_ingress_rule" "prometheus_from_grafana" {
   security_group_id            = aws_security_group.prometheus.id
   referenced_security_group_id = aws_security_group.grafana.id
   from_port                    = 9090
   to_port                      = 9090
   ip_protocol                  = "tcp"
-}
+}*/
 
-resource "aws_vpc_security_group_egress_rule" "prometheus_all_out" {
+/*resource "aws_vpc_security_group_egress_rule" "prometheus_all_out" {
   security_group_id = aws_security_group.prometheus.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
-}
+}*/
 #========================================
 
-resource "aws_security_group" "webApp" {
+/*resource "aws_security_group" "webApp" {
   name        = "webApp-sg"
   description = "Allow 5000 and 9100 for webApp"
   vpc_id      = var.vpc_id
@@ -329,36 +329,36 @@ resource "aws_security_group" "webApp" {
   tags = {
     Name = "webApp-sg"
   }
-}
+}*/
 
-resource "aws_vpc_security_group_ingress_rule" "webapp_5000_from_my_ip" {
+/*resource "aws_vpc_security_group_ingress_rule" "webapp_5000_from_my_ip" {
   security_group_id = aws_security_group.webApp.id
   cidr_ipv4         = var.trusted_ip
   from_port         = 5000
   to_port           = 5000
   ip_protocol       = "tcp"
-}
+}*/
 
-resource "aws_vpc_security_group_ingress_rule" "webapp_9100_from_my_ip" {
+/*resource "aws_vpc_security_group_ingress_rule" "webapp_9100_from_my_ip" {
   security_group_id = aws_security_group.webApp.id
   cidr_ipv4         = var.trusted_ip
   from_port         = 9100
   to_port           = 9100
   ip_protocol       = "tcp"
-}
+}*/
 
-resource "aws_vpc_security_group_ingress_rule" "webapp_5000_from_prometheus" {
+/*resource "aws_vpc_security_group_ingress_rule" "webapp_5000_from_prometheus" {
   security_group_id            = aws_security_group.webApp.id
   referenced_security_group_id = aws_security_group.prometheus.id
   from_port                    = 5000
   to_port                      = 5000
   ip_protocol                  = "tcp"
-}
+}*/
 
-resource "aws_vpc_security_group_ingress_rule" "webapp_9100_from_prometheus" {
+/*resource "aws_vpc_security_group_ingress_rule" "webapp_9100_from_prometheus" {
   security_group_id            = aws_security_group.webApp.id
   referenced_security_group_id = aws_security_group.prometheus.id
   from_port                    = 9100
   to_port                      = 9100
   ip_protocol                  = "tcp"
-}
+}*/
