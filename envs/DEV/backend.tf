@@ -23,7 +23,7 @@ terraform {
     bucket = "guru.nanak.jahaz"
     key    = "dev"
     region = "us-east-1"
-    #dynamodb_table = "Terraform_VPC"
+    dynamodb_table = "Terraform_VPC"
     encrypt = true
   }
 }
