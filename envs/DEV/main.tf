@@ -1,3 +1,6 @@
+####################################
+# Key Pairs
+####################################
 resource "aws_key_pair" "dev" {
   key_name   = "devops_project"
   public_key = file("${path.module}/keypair/devops_project.pub")
@@ -7,6 +10,16 @@ resource "aws_key_pair" "dev" {
   }
 }
 
+####################################
+# IAM (Identity & Access Management)
+####################################
+module "iam" {
+  source = "../../global/iam"
+}
+
+####################################
+# VPC (Virtual Private Cloud)
+####################################
 module "vpc" {
   source = "../../modules/vpc"
 
@@ -15,17 +28,23 @@ module "vpc" {
 
   azs             = [var.Zone1, var.Zone2, var.Zone3]
   public_subnets  = [var.PubSub1CIDR, var.PubSub2CIDR, var.PubSub3CIDR]
-  private_subnets = []
+  #private_subnets = []
 
   PROJECT = var.PROJECT
 }
 
+####################################
+# Security Groups
+####################################
 module "security_groups" {
   source     = "../../modules/security_groups"
   vpc_id     = module.vpc.vpc_id
   trusted_ip = var.trusted_ip
 }
 
+####################################
+# Docker multi-node setup
+####################################
 /*module "docker" {
   source = "../../modules/ec2"
 
@@ -40,11 +59,14 @@ module "security_groups" {
   instance_type      = var.instance_type
   key_name           = aws_key_pair.dev.key_name
   subnet_id          = each.value
-  security_group_ids = [ module.security_groups.ssh_sg_id, module.security_groups.allow_all_sg_id ]
+  security_group_ids = [ module.security_groups.ssh_sg_id, module.security_groups.allow_all_traffic_id ]
 
   user_data = file("../../modules/ec2/installation_scripts/docker_install.sh")
 }*/
 
+####################################
+# Jenkins Master-Slave Architecture
+####################################
 /*module "jenkins_master" {
   source = "../../modules/ec2"
 
@@ -72,7 +94,6 @@ module "security_groups" {
 
   user_data = file("jenkins_master.sh")
 }
-
 
 module "jenkins_agent" {
   source = "../../modules/ec2"
@@ -102,11 +123,15 @@ module "jenkins_agent" {
   user_data = file("jenkins_agent.sh")
 }*/
 
-module "iam" {
-  source = "../../global/iam"
-}
-
+####################################
+# Ansible Controller-node Setup
+####################################
 /*locals {
+  subnet_map = {
+    public-a = module.vpc.public_subnets[0]
+    public-b = module.vpc.public_subnets[1]
+    public-c = module.vpc.public_subnets[2]
+  }
 
   controller = {
     name        = "controller"
@@ -122,22 +147,14 @@ module "iam" {
       ami_id      = data.aws_ami.ubuntu_22.id
       subnet_name = "public-a"
     }
-    stage = {
-      ami_id      = data.aws_ami.linux.id
-      subnet_name = "public-b"
-    }
-    prod = {
-      ami_id      = data.aws_ami.linux.id
-      subnet_name = "public-c"
-    }
-  }
-}
-
-locals {
-  subnet_map = {
-    public-a = module.vpc.public_subnets[0]
-    public-b = module.vpc.public_subnets[1]
-    public-c = module.vpc.public_subnets[2]
+    #stage = {
+    #  ami_id      = data.aws_ami.linux.id
+    #  subnet_name = "public-b"
+    #}
+    #prod = {
+    #  ami_id      = data.aws_ami.linux.id
+    #  subnet_name = "public-c"
+    #}
   }
 }
 
@@ -160,7 +177,6 @@ module "controller" {
   }
 }
 
-
 module "nodes" {
   source = "../../modules/ec2"
 
@@ -171,7 +187,7 @@ module "nodes" {
   subnet_id          = local.subnet_map[each.value.subnet_name]
   instance_type      = var.instance_type
   key_name           = aws_key_pair.dev.key_name
-  security_group_ids = [module.security_groups.ssh_sg_id, module.security_groups.allow_all_sg_id]
+  security_group_ids = [module.security_groups.ssh_sg_id, module.security_groups.allow_all_traffic_id]
 
   user_data = file("../../modules/ec2/installation_scripts/ansible_node.sh")
 
@@ -181,43 +197,10 @@ module "nodes" {
   }
 }*/
 
-/*module "grafana" {
-  source = "../../modules/ec2"
-
-  name               = "grafana"
-  ami_id             = data.aws_ami.ubuntu_24.id
-  instance_type      = var.instance_type
-  key_name           = aws_key_pair.dev.key_name
-  security_group_ids = [  module.security_groups.ssh_sg_id, module.security_groups.grafana_sg_id ]
-  subnet_id = module.vpc.public_subnets[0]
-  user_data = file("../../modules/ec2/installation_scripts/grafana-setup.sh")
-}
-
-module "prometheus" {
-  source = "../../modules/ec2"
-
-  name               = "prometheus"
-  ami_id             = data.aws_ami.ubuntu_24.id
-  instance_type      = var.instance_type
-  key_name           = aws_key_pair.dev.key_name
-  security_group_ids = [  module.security_groups.ssh_sg_id, module.security_groups.prometheus_sg_id ]
-  subnet_id = module.vpc.public_subnets[1]
-  user_data = file("../../modules/ec2/installation_scripts/prometheus-setup.sh")
-}*/
-
-/*module "loki" {
-  source = "../../modules/ec2"
-
-  name               = "loki"
-  ami_id             = data.aws_ami.ubuntu_24.id
-  instance_type      = var.instance_type
-  key_name           = aws_key_pair.dev.key_name
-  security_group_ids = [  module.security_groups.ssh_sg_id, module.security_groups.loki_sg_id ]
-  subnet_id = module.vpc.public_subnets[2]
-  user_data = file("../../modules/ec2/installation_scripts/lokisetup.sh")
-}*/
-
-locals {
+####################################
+# Monitoring and Observability
+####################################
+/*locals {
   observability_services = {
     grafana = {
       sg_id     = module.security_groups.grafana_sg_id
@@ -241,6 +224,7 @@ locals {
       sg_id     = module.security_groups.webApp_sg_id
       subnet_id = module.vpc.public_subnets[0]
       user_data = "../../modules/ec2/installation_scripts/webnode_setup.sh"
+# Note: We need to add Private IP of "prometheus" and "loki" in /etc/alloy/config.alloy
     }
   }
 }
@@ -262,4 +246,4 @@ module "observability" {
 
   subnet_id = each.value.subnet_id
   user_data = file(each.value.user_data)
-}
+}*/
