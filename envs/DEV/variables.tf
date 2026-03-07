@@ -17,3 +17,4 @@ variable "PrivSub1CIDR" {}
 variable "PrivSub2CIDR" {}
 variable "PrivSub3CIDR" {}
 variable "instance_type" {}
+variable "docker_instance_type" {}
