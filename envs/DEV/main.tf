@@ -26,9 +26,9 @@ module "vpc" {
   VPC_NAME = var.VPC_NAME
   VpcCIDR  = var.VpcCIDR
 
-  azs             = [var.Zone1, var.Zone2, var.Zone3]
-  public_subnets  = [var.PubSub1CIDR, var.PubSub2CIDR, var.PubSub3CIDR]
-  #private_subnets = []
+  azs            = [var.Zone1 /*, var.Zone2, var.Zone3*/]
+  public_subnets = [var.PubSub1CIDR /*, var.PubSub2CIDR, var.PubSub3CIDR*/]
+  #private_subnets = [var.PrivSub1CIDR, var.PrivSub2CIDR, var.PrivSub2CIDR]
 
   PROJECT = var.PROJECT
 }
@@ -48,18 +48,21 @@ module "security_groups" {
 /*module "docker" {
   source = "../../modules/ec2"
 
-  for_each = {
-    #docker1 = module.vpc.public_subnets[0]
-    #docker2 = module.vpc.public_subnets[1]
-    #docker3 = module.vpc.public_subnets[2]
-  }
+  #for_each = {
+  #docker1 = module.vpc.public_subnets[0]
+  #docker2 = module.vpc.public_subnets[1]
+  #docker3 = module.vpc.public_subnets[2]
+  #}
 
-  name               = "${var.PROJECT}-${each.key}"
-  ami_id             = data.aws_ami.ubuntu_24.id
-  instance_type      = var.instance_type
-  key_name           = aws_key_pair.dev.key_name
-  subnet_id          = each.value
-  security_group_ids = [ module.security_groups.ssh_sg_id, module.security_groups.allow_all_traffic_id ]
+  name          = "Docker+Jenkins"
+  ami_id        = data.aws_ami.ubuntu_24.id
+  instance_type = var.docker_instance_type
+  key_name      = aws_key_pair.dev.key_name
+  subnet_id     = module.vpc.public_subnets[0]
+  security_group_ids = [
+    module.security_groups.ssh_sg_id,
+    module.security_groups.allow_all_traffic_id
+  ]
 
   user_data = file("../../modules/ec2/installation_scripts/docker_install.sh")
 }*/

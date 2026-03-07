@@ -6,7 +6,6 @@ output "controller_public_ip" {
   value = module.controller.public_ip
 }
 
-
 output "nodes_private_ips" {
   value = {
     for k, m in module.nodes :
@@ -19,4 +18,8 @@ output "nodes_public_ips" {
     for k, m in module.nodes :
     k => m.public_ip
   }
+}
+
+output "docker" {
+  value = module.docker.public_ip
 }*/
