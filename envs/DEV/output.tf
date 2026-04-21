@@ -18,8 +18,8 @@ output "nodes_public_ips" {
     for k, m in module.nodes :
     k => m.public_ip
   }
-}
+}*/
 
 output "docker" {
   value = module.docker.public_ip
-}*/
+}

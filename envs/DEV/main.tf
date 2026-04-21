@@ -45,7 +45,7 @@ module "security_groups" {
 ####################################
 # Docker multi-node setup
 ####################################
-/*module "docker" {
+module "docker" {
   source = "../../modules/ec2"
 
   #for_each = {
@@ -56,7 +56,8 @@ module "security_groups" {
 
   name          = "Docker+Jenkins"
   ami_id        = data.aws_ami.ubuntu_24.id
-  instance_type = var.docker_instance_type
+  #instance_type = var.docker_instance_type
+  instance_type = var.instance_type
   key_name      = aws_key_pair.dev.key_name
   subnet_id     = module.vpc.public_subnets[0]
   security_group_ids = [
@@ -65,7 +66,7 @@ module "security_groups" {
   ]
 
   user_data = file("../../modules/ec2/installation_scripts/docker_install.sh")
-}*/
+}
 
 ####################################
 # Jenkins Master-Slave Architecture
