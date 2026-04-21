@@ -1,7 +1,3 @@
-
-
-
-
 /*module "docker" {
   source = "./modules/ec2"
 
