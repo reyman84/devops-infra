@@ -25,4 +25,4 @@ instance_type        = "t2.micro"
 docker_instance_type = "t2.medium"
 
 #Others
-trusted_ip = "49.207.50.91/32"
+trusted_ip = "122.171.21.9/32"
