@@ -65,7 +65,7 @@ resource "aws_vpc_security_group_ingress_rule" "ssh_self" {
 ##########################################
 
 # Jenkins SG
-/*resource "aws_security_group" "jenkins_master" {
+resource "aws_security_group" "jenkins_master" {
   name        = "jenkins-master-sg"
   description = "Jenkins Master SG"
   vpc_id      = var.vpc_id
@@ -73,7 +73,7 @@ resource "aws_vpc_security_group_ingress_rule" "ssh_self" {
   tags = {
     Name = "jenkins-master-sg"
   }
-}*/
+}
 
 # Nexus SG
 /*resource "aws_security_group" "nexus" {
@@ -102,14 +102,14 @@ resource "aws_vpc_security_group_ingress_rule" "ssh_self" {
 ##########################################
 
 # Jenkins (8080)
-/*resource "aws_security_group_rule" "jenkins_http_trusted" {
+resource "aws_security_group_rule" "jenkins_http_trusted" {
   type              = "ingress"
   from_port         = 8080
   to_port           = 8080
   protocol          = "tcp"
   cidr_blocks       = [var.trusted_ip]
   security_group_id = aws_security_group.jenkins_master.id
-}*/
+}
 
 # Nexus (8081)
 /*resource "aws_security_group_rule" "nexus_http_trusted" {
@@ -179,14 +179,14 @@ resource "aws_vpc_security_group_ingress_rule" "ssh_self" {
 #           GitHub Webhooks
 ##########################################
 
-/*resource "aws_security_group_rule" "jenkins_webhook" {
+resource "aws_security_group_rule" "jenkins_webhook" {
   type              = "ingress"
   from_port         = 8080
   to_port           = 8080
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.jenkins_master.id
-}*/
+}
 
 ##########################################
 #           Egress Rules
@@ -219,14 +219,14 @@ resource "aws_security_group_rule" "egress_ssh" {
   security_group_id = aws_security_group.nexus.id
 }*/
 
-/*resource "aws_security_group_rule" "egress_jenkins" {
+resource "aws_security_group_rule" "egress_jenkins" {
   type              = "egress"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.jenkins_master.id
-}*/
+}
 
 ##########################################
 #       Monitoring Stack: SG Definitions 

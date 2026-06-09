@@ -32,10 +32,10 @@ output "ssh_sg_id" {
   value       = aws_security_group.webApp.id
 }*/
 
-/*output "jenkins_master_sg_id" {
+output "jenkins_master_sg_id" {
   description = "Jenkins master security group ID"
   value       = aws_security_group.jenkins_master.id
-}*/
+}
 
 /*output "nexus_sg_id" {
   description = "Nexus security group ID"

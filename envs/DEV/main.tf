@@ -13,9 +13,9 @@ resource "aws_key_pair" "dev" {
 ####################################
 # IAM (Identity & Access Management)
 ####################################
-module "iam" {
+/*module "iam" {
   source = "../../global/iam"
-}
+}*/
 
 ####################################
 # VPC (Virtual Private Cloud)
@@ -45,7 +45,7 @@ module "security_groups" {
 ####################################
 # Docker multi-node setup
 ####################################
-module "docker" {
+/*module "docker" {
   source = "../../modules/ec2"
 
   #for_each = {
@@ -66,24 +66,27 @@ module "docker" {
   ]
 
   user_data = file("../../modules/ec2/installation_scripts/docker_install.sh")
-}
+}*/
 
 ####################################
 # Jenkins Master-Slave Architecture
 ####################################
-/*module "jenkins_master" {
+module "jenkins_master" {
   source = "../../modules/ec2"
 
   name               = "jenkins-master"
   ami_id             = data.aws_ami.ubuntu_24.id
-  instance_type      = "t3.large"
+  instance_type      = "t2.micro"
   subnet_id          = module.vpc.public_subnets[0]
-  security_group_ids = [module.security_groups.jenkins_sg_id]
+  security_group_ids = [
+    module.security_groups.ssh_sg_id,
+    module.security_groups.jenkins_master_sg_id
+    ]
   key_name           = aws_key_pair.dev.key_name
 
   instance_count = 1
 
-  root_block_device = {
+  /*root_block_device = {
     volume_size = 50
     volume_type = "gp3"
   }
@@ -94,12 +97,12 @@ module "docker" {
       volume_size = 150
       volume_type = "gp3"
     }
-  ]
+  ]*/
 
-  user_data = file("jenkins_master.sh")
+  user_data = file("../../modules/ec2/installation_scripts/jenkins_master.sh")
 }
 
-module "jenkins_agent" {
+/*module "jenkins_agent" {
   source = "../../modules/ec2"
 
   name               = "jenkins-agent"
@@ -160,9 +163,9 @@ module "jenkins_agent" {
     #  subnet_name = "public-c"
     #}
   }
-}
+}*/
 
-module "controller" {
+/*module "controller" {
   source = "../../modules/ec2"
 
   name               = "${var.PROJECT}-controller"
@@ -179,9 +182,9 @@ module "controller" {
     Role = "controller"
     Env  = "shared"
   }
-}
+}*/
 
-module "nodes" {
+/*module "nodes" {
   source = "../../modules/ec2"
 
   for_each = local.environments
@@ -231,9 +234,9 @@ module "nodes" {
 # Note: We need to add Private IP of "prometheus" and "loki" in /etc/alloy/config.alloy
     }
   }
-}
+}*/
 
-module "observability" {
+/*module "observability" {
   source = "../../modules/ec2"
 
   for_each = local.observability_services
